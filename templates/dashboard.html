@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Local AIOps Dashboard</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+</head>
+
+<body class="dark">
+
+<div class="container">
+
+<header>
+  <h1>🧠 Local AIOps Dashboard</h1>
+  <p>Multi-metric anomaly detection (ML-powered)</p>
+  <div style="text-align:right;">
+  <a href="/logout" style="color:#93c5fd;">Logout</a>
+</div>
+
+</header>
+
+<section class="cards">
+  <a href="/" class="card-link">
+  <div class="card blue {{ 'active' if view == 'all' }}">
+    <h3>Total Records</h3>
+   <p>{{ total_count }}</p>
+
+  </div>
+</a>
+
+  <a href="/?view=anomalies" class="card-link">
+  <div class="card red {{ 'active' if view == 'anomalies' }}">
+    <h3>Anomalies</h3>
+    <p>{{ anomalies }}</p>
+  </div>
+</a>
+
+  <div class="card green">Health<br><span>{{ 100 - anomalies * 2 }}%</span></div>
+</section>
+
+<br>
+<div class="action">
+  <a href="/detect"><button>Run ML Detection</button></a>
+</div>
+
+<br>
+<canvas id="metricsChart"></canvas>
+<br>
+<table>
+  <tr>
+  <th>#</th>
+  <th>CPU</th>
+  <th>Memory</th>
+  <th>Disk</th>
+  <th>Network</th>
+  <th>Error</th>
+  <th>Status</th>
+  <th>Severity</th>
+</tr>
+
+
+ {% for m in metrics %}
+<tr>
+  <td>{{ total_count - ((page - 1) * page_size) - loop.index + 1 }}</td>
+  <td>{{ m.cpu|round(1) }}</td>
+  <td>{{ m.memory|round(1) }}</td>
+  <td>{{ m.disk|round(1) }}</td>
+  <td>{{ m.network|round(1) }}</td>
+  <td>{{ m.error_rate }}</td>
+  <td>
+    <span class="badge {{ 'anomaly' if m.anomaly == -1 else 'normal' }}">
+      {{ 'Anomaly' if m.anomaly == -1 else 'Normal' }}
+    </span>
+  </td>
+  <td>{{ m.score|round(1) }}</td>
+</tr>
+{% endfor %}
+
+</table>
+
+<div class="pagination">
+  {% if page > 1 %}
+    <a href="/?view={{ view }}&page={{ page - 1 }}">⬅ Prev</a>
+  {% endif %}
+
+  <span>Page {{ page }} of {{ total_pages }}</span>
+
+  {% if page < total_pages %}
+    <a href="/?view={{ view }}&page={{ page + 1 }}">Next ➡</a>
+  {% endif %}
+</div>
+
+
+</div>
+
+<script src="/static/charts.js"></script>
+<script>
+setTimeout(() => location.reload(), 15000);
+</script>
+
+</body>
+</html>
